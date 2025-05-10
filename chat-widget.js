@@ -11,6 +11,7 @@
   let baserowRowId = null
   let typingIndicator = null
   let pollTimer = null
+  let isPortrait = window.innerHeight > window.innerWidth
 
   const defaultConfig = {
     webhook: { url: "", route: "" },
@@ -71,12 +72,15 @@
     setupEventListeners()
 
     // Verifica e ajusta para dispositivos móveis
-    ensureMobileVisibility()
+    adjustForCurrentOrientation()
 
     // Adiciona listener para orientationchange específico
     window.addEventListener("orientationchange", () => {
+      // Atualiza a variável de orientação
+      isPortrait = window.innerHeight > window.innerWidth
+
       // Pequeno atraso para garantir que as dimensões da tela foram atualizadas
-      setTimeout(ensureMobileVisibility, 100)
+      setTimeout(adjustForCurrentOrientation, 100)
     })
   }
 
@@ -110,8 +114,8 @@
         @media (max-width: 480px) {
             .chat-widget .chat-container {
                 width: 85%;
-                height: 75vh;
-                max-height: 75vh;
+                height: 60vh;
+                max-height: 60vh;
                 bottom: 70px;
                 ${config.style.position === "left" ? "left: 7.5%;" : "right: 7.5%;"}
                 border-radius: 12px;
@@ -489,8 +493,9 @@
         /* Ajustes para tela de orientação landscape em dispositivos móveis */
         @media (max-height: 500px) and (orientation: landscape) {
             .chat-widget .chat-container {
-                height: 85vh;
+                height: 80vh;
                 bottom: 10px;
+                top: 50px;
             }
             .chat-widget .welcome-text {
                 font-size: 16px;
@@ -612,56 +617,98 @@
     textarea.style.height = "auto"
   }
 
-  // Função para garantir que o widget seja visível em dispositivos móveis
-  function ensureMobileVisibility() {
+  // Função para ajustar o widget com base na orientação atual
+  function adjustForCurrentOrientation() {
+    // Atualiza a variável de orientação
+    isPortrait = window.innerHeight > window.innerWidth
+
     // Verifica se é um dispositivo móvel
     if (window.innerWidth <= 480) {
-      // Ajusta o posicionamento para garantir visibilidade
-      if (chatContainer) {
-        // Posiciona o widget acima do botão flutuante
-        chatContainer.style.bottom = "70px"
-
-        // Limita a altura para garantir que caiba na tela
-        const viewportHeight = window.innerHeight
-        const maxHeight = Math.min(viewportHeight * 0.75, 500)
-        chatContainer.style.height = `${maxHeight}px`
-        chatContainer.style.maxHeight = `${maxHeight}px`
-
-        // Centraliza horizontalmente
-        chatContainer.style.left = "7.5%"
-        chatContainer.style.right = "7.5%"
-
-        // Remove qualquer posicionamento top que possa estar interferindo
-        chatContainer.style.top = "auto"
-
-        // Força o scroll para o topo quando o chat está aberto
-        if (chatContainer.classList.contains("open")) {
-          // Força o scroll para o topo
-          window.scrollTo(0, 0)
-
-          // Previne o scroll da página
-          document.body.style.overflow = "hidden"
-
-          // Adiciona um pequeno atraso para garantir que o scroll seja aplicado
-          setTimeout(() => {
-            window.scrollTo(0, 0)
-          }, 50)
-        }
+      if (isPortrait) {
+        // Orientação vertical (portrait)
+        adjustForPortrait()
+      } else {
+        // Orientação horizontal (landscape)
+        adjustForLandscape()
       }
     } else {
       // Restaura configurações padrão para desktop
-      if (chatContainer) {
-        chatContainer.style.bottom = "20px"
-        chatContainer.style.height = "80vh"
-        chatContainer.style.maxHeight = "600px"
+      resetToDesktop()
+    }
+  }
 
-        if (config.style.position === "left") {
-          chatContainer.style.left = "20px"
-          chatContainer.style.right = "auto"
-        } else {
-          chatContainer.style.right = "20px"
-          chatContainer.style.left = "auto"
-        }
+  // Ajustes específicos para orientação vertical (portrait)
+  function adjustForPortrait() {
+    if (chatContainer) {
+      // Reduz significativamente a altura para garantir que caiba na tela
+      const viewportHeight = window.innerHeight
+      const maxHeight = Math.min(viewportHeight * 0.6, 500) // 60% da altura da tela
+
+      // Posiciona o widget acima do botão flutuante com espaço suficiente
+      chatContainer.style.height = `${maxHeight}px`
+      chatContainer.style.maxHeight = `${maxHeight}px`
+      chatContainer.style.bottom = "70px"
+
+      // Centraliza horizontalmente
+      chatContainer.style.left = "7.5%"
+      chatContainer.style.right = "7.5%"
+
+      // Remove qualquer posicionamento top que possa estar interferindo
+      chatContainer.style.top = "auto"
+
+      // Força o scroll para o topo quando o chat está aberto
+      if (chatContainer.classList.contains("open")) {
+        // Força o scroll para o topo
+        window.scrollTo(0, 0)
+
+        // Previne o scroll da página
+        document.body.style.overflow = "hidden"
+      }
+    }
+  }
+
+  // Ajustes específicos para orientação horizontal (landscape)
+  function adjustForLandscape() {
+    if (chatContainer) {
+      // Em landscape, deixa mais espaço na parte superior
+      const viewportHeight = window.innerHeight
+      const maxHeight = Math.min(viewportHeight * 0.8, 400) // 80% da altura da tela
+
+      // Posiciona o widget com espaço suficiente da barra superior
+      chatContainer.style.height = `${maxHeight}px`
+      chatContainer.style.maxHeight = `${maxHeight}px`
+      chatContainer.style.bottom = "10px"
+      chatContainer.style.top = "50px" // Espaço para a barra de ferramentas
+
+      // Centraliza horizontalmente
+      chatContainer.style.left = "7.5%"
+      chatContainer.style.right = "7.5%"
+
+      // Força o scroll para o topo quando o chat está aberto
+      if (chatContainer.classList.contains("open")) {
+        // Força o scroll para o topo
+        window.scrollTo(0, 0)
+
+        // Previne o scroll da página
+        document.body.style.overflow = "hidden"
+      }
+    }
+  }
+
+  // Restaura configurações padrão para desktop
+  function resetToDesktop() {
+    if (chatContainer) {
+      chatContainer.style.bottom = "20px"
+      chatContainer.style.height = "80vh"
+      chatContainer.style.maxHeight = "600px"
+      chatContainer.style.top = "auto"
+
+      if (config.style.position === "left") {
+        chatContainer.style.left = "20px"
+        chatContainer.style.right = "auto"
+      } else {
+        chatContainer.style.right = "20px"
+        chatContainer.style.left = "auto"
       }
     }
   }
@@ -672,7 +719,7 @@
     widgetContainer.querySelector(".chat-toggle").addEventListener("click", () => {
       // Antes de abrir, garante que o widget esteja posicionado corretamente
       if (!chatContainer.classList.contains("open")) {
-        ensureMobileVisibility()
+        adjustForCurrentOrientation()
       }
 
       chatContainer.classList.toggle("open")
@@ -713,7 +760,13 @@
     })
 
     // Detecta mudanças de orientação e tamanho da tela
-    window.addEventListener("resize", handleResize)
+    window.addEventListener("resize", () => {
+      // Atualiza a variável de orientação
+      isPortrait = window.innerHeight > window.innerWidth
+
+      // Ajusta o widget com base na nova orientação
+      handleResize()
+    })
 
     // Adiciona um listener para o evento de scroll para garantir que o widget permaneça visível
     window.addEventListener("scroll", () => {
@@ -735,9 +788,10 @@
     // Ajusta para tela cheia em dispositivos móveis
     if (window.innerWidth <= 480 && chatContainer.classList.contains("open")) {
       document.body.style.overflow = "hidden"
-      ensureMobileVisibility() // Garante que o widget seja visível após redimensionamento
+      adjustForCurrentOrientation() // Garante que o widget seja visível após redimensionamento
     } else {
       document.body.style.overflow = ""
+      resetToDesktop()
     }
   }
 
