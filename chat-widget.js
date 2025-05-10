@@ -69,6 +69,15 @@
 
     // Adiciona event listeners
     setupEventListeners()
+
+    // Verifica e ajusta para dispositivos móveis
+    ensureMobileVisibility()
+
+    // Adiciona listener para orientationchange específico
+    window.addEventListener("orientationchange", () => {
+      // Pequeno atraso para garantir que as dimensões da tela foram atualizadas
+      setTimeout(ensureMobileVisibility, 100)
+    })
   }
 
   // Função para obter estilos - separada para melhor organização
@@ -89,7 +98,7 @@
             display: none;
             width: 90%;
             max-width: 380px;
-            height: 90vh;
+            height: 80vh;
             max-height: 600px;
             background: var(--chat--color-background);
             border-radius: 12px;
@@ -100,17 +109,19 @@
         }
         @media (max-width: 480px) {
             .chat-widget .chat-container {
-                width: 100%;
-                height: 100vh;
-                max-height: 100vh;
-                bottom: 0;
-                ${config.style.position === "left" ? "left: 0;" : "right: 0;"}
-                border-radius: 0;
-                max-width: 100%;
+                width: 92%;
+                height: 92vh;
+                max-height: 92vh;
+                bottom: 4vh;
+                ${config.style.position === "left" ? "left: 4%;" : "right: 4%;"}
+                border-radius: 12px;
+                max-width: 92%;
             }
             .chat-widget .chat-toggle {
                 bottom: 10px;
                 ${config.style.position === "left" ? "left: 10px;" : "right: 10px;"}
+                width: 50px;
+                height: 50px;
             }
         }
         .chat-widget .chat-container.open {
@@ -118,12 +129,18 @@
             flex-direction: column;
         }
         .chat-widget .brand-header {
-            padding: 16px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             gap: 12px;
             border-bottom: 1px solid rgba(133, 79, 255, 0.1);
             position: relative;
+            flex-shrink: 0;
+        }
+        @media (max-width: 480px) {
+            .chat-widget .brand-header {
+                padding: 8px 12px;
+            }
         }
         .chat-widget .close-button {
             position: absolute;
@@ -149,10 +166,21 @@
             width: 32px;
             height: 32px;
         }
+        @media (max-width: 480px) {
+            .chat-widget .brand-header img {
+                width: 24px;
+                height: 24px;
+            }
+        }
         .chat-widget .brand-header span {
             font-size: 18px;
             font-weight: 500;
             color: var(--chat--color-font);
+        }
+        @media (max-width: 480px) {
+            .chat-widget .brand-header span {
+                font-size: 16px;
+            }
         }
         .chat-widget .new-conversation {
             position: absolute;
@@ -166,8 +194,8 @@
         }
         @media (max-width: 480px) {
             .chat-widget .new-conversation {
-                max-width: 90%;
-                padding: 15px;
+                max-width: 85%;
+                padding: 12px;
             }
         }
         .chat-widget .welcome-text {
@@ -179,7 +207,7 @@
         }
         @media (max-width: 480px) {
             .chat-widget .welcome-text {
-                font-size: 20px;
+                font-size: 18px;
                 margin-bottom: 16px;
             }
         }
@@ -206,19 +234,30 @@
         }
         @media (max-width: 480px) {
             .chat-widget .new-chat-btn {
-                padding: 14px 20px;
-                font-size: 15px;
+                padding: 12px 16px;
+                font-size: 14px;
             }
         }
         .chat-widget .message-icon {
             width: 20px;
             height: 20px;
         }
+        @media (max-width: 480px) {
+            .chat-widget .message-icon {
+                width: 16px;
+                height: 16px;
+            }
+        }
         .chat-widget .response-text {
             font-size: 14px;
             color: var(--chat--color-font);
             opacity: 0.7;
             margin: 0;
+        }
+        @media (max-width: 480px) {
+            .chat-widget .response-text {
+                font-size: 12px;
+            }
         }
         .chat-widget .chat-interface {
             display: none;
@@ -231,7 +270,7 @@
         .chat-widget .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 16px;
             background: var(--chat--color-background);
             display: flex;
             flex-direction: column;
@@ -239,12 +278,12 @@
         }
         @media (max-width: 480px) {
             .chat-widget .chat-messages {
-                padding: 15px;
+                padding: 10px;
             }
         }
         .chat-widget .chat-message {
             padding: 12px 16px;
-            margin: 8px 0;
+            margin: 6px 0;
             border-radius: 12px;
             max-width: 80%;
             word-wrap: break-word;
@@ -254,8 +293,9 @@
         @media (max-width: 480px) {
             .chat-widget .chat-message {
                 max-width: 85%;
-                padding: 10px 14px;
+                padding: 8px 12px;
                 font-size: 13px;
+                margin: 4px 0;
             }
         }
         .chat-widget .chat-message.user {
@@ -273,22 +313,23 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         .chat-widget .chat-input {
-            padding: 16px;
+            padding: 12px;
             background: var(--chat--color-background);
             border-top: 1px solid rgba(133, 79, 255, 0.1);
             display: flex;
             gap: 8px;
+            flex-shrink: 0;
         }
         @media (max-width: 480px) {
             .chat-widget .chat-input {
-                padding: 12px;
+                padding: 8px;
                 position: sticky;
                 bottom: 0;
             }
         }
         .chat-widget .chat-input textarea {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid rgba(133, 79, 255, 0.2);
             border-radius: 8px;
             background: var(--chat--color-background);
@@ -296,6 +337,15 @@
             resize: none;
             font-family: inherit;
             font-size: 14px;
+            min-height: 40px;
+            max-height: 120px;
+        }
+        @media (max-width: 480px) {
+            .chat-widget .chat-input textarea {
+                padding: 8px;
+                font-size: 13px;
+                min-height: 36px;
+            }
         }
         .chat-widget .chat-input textarea::placeholder {
             color: var(--chat--color-font);
@@ -306,7 +356,7 @@
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 0 20px;
+            padding: 0 16px;
             cursor: pointer;
             transition: transform 0.2s;
             font-family: inherit;
@@ -314,8 +364,9 @@
         }
         @media (max-width: 480px) {
             .chat-widget .chat-input button {
-                padding: 0 15px;
-                min-width: 60px;
+                padding: 0 12px;
+                min-width: 50px;
+                font-size: 13px;
             }
         }
         .chat-widget .chat-input button:hover {
@@ -347,11 +398,18 @@
             height: 24px;
             fill: currentColor;
         }
+        @media (max-width: 480px) {
+            .chat-widget .chat-toggle svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
         .chat-widget .chat-footer {
-            padding: 8px;
+            padding: 6px;
             text-align: center;
             background: var(--chat--color-background);
             border-top: 1px solid rgba(133, 79, 255, 0.1);
+            flex-shrink: 0;
         }
         .chat-widget .chat-footer a {
             color: var(--chat--color-primary);
@@ -360,6 +418,11 @@
             opacity: 0.8;
             transition: opacity 0.2s;
             font-family: inherit;
+        }
+        @media (max-width: 480px) {
+            .chat-widget .chat-footer a {
+                font-size: 10px;
+            }
         }
         .chat-widget .chat-footer a:hover {
             opacity: 1;
@@ -382,6 +445,12 @@
             border-radius: 50%;
             animation: typingIndicator 1s infinite;
             opacity: 0.4;
+        }
+        @media (max-width: 480px) {
+            .typing-dots .dot {
+                width: 6px;
+                height: 6px;
+            }
         }
         .typing-dots .dot:nth-child(2) {
             animation-delay: 0.2s;
@@ -420,17 +489,28 @@
         @media (max-height: 500px) and (orientation: landscape) {
             .chat-widget .chat-container {
                 height: 85vh;
+                bottom: 10px;
             }
             .chat-widget .welcome-text {
-                font-size: 18px;
-                margin-bottom: 12px;
+                font-size: 16px;
+                margin-bottom: 10px;
             }
             .chat-widget .new-chat-btn {
-                padding: 10px 16px;
+                padding: 8px 12px;
             }
             .chat-widget .chat-message {
-                padding: 8px 12px;
-                margin: 6px 0;
+                padding: 6px 10px;
+                margin: 4px 0;
+            }
+            .chat-widget .brand-header {
+                padding: 6px 10px;
+            }
+            .chat-widget .brand-header img {
+                width: 20px;
+                height: 20px;
+            }
+            .chat-widget .brand-header span {
+                font-size: 14px;
             }
         }`
   }
@@ -531,8 +611,51 @@
     textarea.style.height = "auto"
   }
 
+  // Adicione esta função para garantir que o widget seja visível em dispositivos móveis
+  // Adicione esta função logo após a função setupTextareaAutoResize()
+
+  function ensureMobileVisibility() {
+    // Verifica se é um dispositivo móvel
+    if (window.innerWidth <= 480) {
+      // Garante que o widget não ultrapasse os limites da tela
+      const viewportHeight = window.innerHeight
+      const chatHeight = Math.min(viewportHeight * 0.92, 600)
+
+      // Ajusta a altura do container
+      if (chatContainer) {
+        chatContainer.style.height = `${chatHeight}px`
+
+        // Garante que o widget comece a ser exibido a partir do topo visível da tela
+        chatContainer.style.bottom = `${viewportHeight * 0.04}px`
+
+        // Ajusta o scroll para garantir que o topo seja visível
+        if (chatContainer.classList.contains("open")) {
+          window.scrollTo(0, 0)
+        }
+      }
+    }
+  }
+
   // Configura event listeners
   function setupEventListeners() {
+    // Modifique a função setupEventListeners para chamar ensureMobileVisibility
+    // Encontre a função setupEventListeners e adicione a chamada para ensureMobileVisibility
+    // dentro do evento de clique do botão flutuante:
+
+    // Substitua este trecho:
+    // Botão flutuante (abre/fecha chat)
+    // widgetContainer.querySelector(".chat-toggle").addEventListener("click", () => {
+    //   chatContainer.classList.toggle("open")
+
+    //   // Se estiver abrindo em mobile, ajusta para tela cheia
+    //   if (chatContainer.classList.contains("open") && window.innerWidth <= 480) {
+    //     document.body.style.overflow = "hidden" // Previne scroll da página
+    //   } else {
+    //     document.body.style.overflow = "" // Restaura scroll
+    //   }
+    // })
+
+    // Por este:
     // Botão flutuante (abre/fecha chat)
     widgetContainer.querySelector(".chat-toggle").addEventListener("click", () => {
       chatContainer.classList.toggle("open")
@@ -540,6 +663,12 @@
       // Se estiver abrindo em mobile, ajusta para tela cheia
       if (chatContainer.classList.contains("open") && window.innerWidth <= 480) {
         document.body.style.overflow = "hidden" // Previne scroll da página
+        ensureMobileVisibility() // Garante que o widget seja visível
+
+        // Força um pequeno atraso para garantir que o scroll seja aplicado após a abertura
+        setTimeout(() => {
+          window.scrollTo(0, 0)
+        }, 50)
       } else {
         document.body.style.overflow = "" // Restaura scroll
       }
@@ -583,6 +712,7 @@
     // Ajusta para tela cheia em dispositivos móveis
     if (window.innerWidth <= 480 && chatContainer.classList.contains("open")) {
       document.body.style.overflow = "hidden"
+      ensureMobileVisibility() // Garante que o widget seja visível após redimensionamento
     } else {
       document.body.style.overflow = ""
     }
