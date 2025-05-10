@@ -390,10 +390,59 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(133, 79, 255, 0.3);
             z-index: 999;
-            transition: transform 0.3s;
+            transition: transform 0.3s, opacity 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
+            opacity: 1;
+            transform-origin: center;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-widget .chat-toggle.hidden {
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+        }
+
+        .chat-widget .chat-container {
+            position: fixed;
+            bottom: 20px;
+            ${config.style.position === "left" ? "left: 20px;" : "right: 20px;"}
+            z-index: 1000;
+            display: none;
+            width: 90%;
+            max-width: 380px;
+            height: 80vh;
+            max-height: 600px;
+            background: var(--chat--color-background);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(133, 79, 255, 0.15);
+            border: 1px solid rgba(133, 79, 255, 0.2);
+            overflow: hidden;
+            font-family: inherit;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .chat-widget .chat-container.open {
+            display: flex;
+            flex-direction: column;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(133, 79, 255, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(133, 79, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(133, 79, 255, 0);
+            }
         }
         .chat-widget .chat-toggle:hover {
             transform: scale(1.05);
@@ -640,9 +689,9 @@
   // Ajustes específicos para orientação vertical (portrait)
   function adjustForPortrait() {
     if (chatContainer) {
-      // Reduz significativamente a altura para garantir que caiba na tela
+      // Aumenta a altura para garantir que caiba na tela
       const viewportHeight = window.innerHeight
-      const maxHeight = Math.min(viewportHeight * 0.6, 500) // 60% da altura da tela
+      const maxHeight = Math.min(viewportHeight * 0.75, 600) // 75% da altura da tela (aumentado de 60%)
 
       // Posiciona o widget acima do botão flutuante com espaço suficiente
       chatContainer.style.height = `${maxHeight}px`
@@ -715,14 +764,19 @@
 
   // Configura event listeners
   function setupEventListeners() {
+    const toggleButton = widgetContainer.querySelector(".chat-toggle")
+
     // Botão flutuante (abre/fecha chat)
-    widgetContainer.querySelector(".chat-toggle").addEventListener("click", () => {
+    toggleButton.addEventListener("click", () => {
       // Antes de abrir, garante que o widget esteja posicionado corretamente
       if (!chatContainer.classList.contains("open")) {
         adjustForCurrentOrientation()
       }
 
       chatContainer.classList.toggle("open")
+
+      // Esconde o botão toggle quando o chat está aberto
+      toggleButton.classList.add("hidden")
 
       // Se estiver abrindo em mobile, ajusta para tela cheia
       if (chatContainer.classList.contains("open") && window.innerWidth <= 480) {
@@ -756,6 +810,9 @@
       if (e.target.classList.contains("close-button")) {
         chatContainer.classList.remove("open")
         document.body.style.overflow = "" // Restaura scroll
+
+        // Mostra o botão toggle novamente quando o chat é fechado
+        toggleButton.classList.remove("hidden")
       }
     })
 
