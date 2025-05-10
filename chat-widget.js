@@ -109,13 +109,14 @@
         }
         @media (max-width: 480px) {
             .chat-widget .chat-container {
-                width: 92%;
-                height: 92vh;
-                max-height: 92vh;
-                bottom: 4vh;
-                ${config.style.position === "left" ? "left: 4%;" : "right: 4%;"}
+                width: 85%;
+                height: 75vh;
+                max-height: 75vh;
+                bottom: 70px;
+                ${config.style.position === "left" ? "left: 7.5%;" : "right: 7.5%;"}
                 border-radius: 12px;
-                max-width: 92%;
+                max-width: 85%;
+                top: auto;
             }
             .chat-widget .chat-toggle {
                 bottom: 10px;
@@ -611,26 +612,55 @@
     textarea.style.height = "auto"
   }
 
-  // Adicione esta função para garantir que o widget seja visível em dispositivos móveis
-  // Adicione esta função logo após a função setupTextareaAutoResize()
-
+  // Função para garantir que o widget seja visível em dispositivos móveis
   function ensureMobileVisibility() {
     // Verifica se é um dispositivo móvel
     if (window.innerWidth <= 480) {
-      // Garante que o widget não ultrapasse os limites da tela
-      const viewportHeight = window.innerHeight
-      const chatHeight = Math.min(viewportHeight * 0.92, 600)
-
-      // Ajusta a altura do container
+      // Ajusta o posicionamento para garantir visibilidade
       if (chatContainer) {
-        chatContainer.style.height = `${chatHeight}px`
+        // Posiciona o widget acima do botão flutuante
+        chatContainer.style.bottom = "70px"
 
-        // Garante que o widget comece a ser exibido a partir do topo visível da tela
-        chatContainer.style.bottom = `${viewportHeight * 0.04}px`
+        // Limita a altura para garantir que caiba na tela
+        const viewportHeight = window.innerHeight
+        const maxHeight = Math.min(viewportHeight * 0.75, 500)
+        chatContainer.style.height = `${maxHeight}px`
+        chatContainer.style.maxHeight = `${maxHeight}px`
 
-        // Ajusta o scroll para garantir que o topo seja visível
+        // Centraliza horizontalmente
+        chatContainer.style.left = "7.5%"
+        chatContainer.style.right = "7.5%"
+
+        // Remove qualquer posicionamento top que possa estar interferindo
+        chatContainer.style.top = "auto"
+
+        // Força o scroll para o topo quando o chat está aberto
         if (chatContainer.classList.contains("open")) {
+          // Força o scroll para o topo
           window.scrollTo(0, 0)
+
+          // Previne o scroll da página
+          document.body.style.overflow = "hidden"
+
+          // Adiciona um pequeno atraso para garantir que o scroll seja aplicado
+          setTimeout(() => {
+            window.scrollTo(0, 0)
+          }, 50)
+        }
+      }
+    } else {
+      // Restaura configurações padrão para desktop
+      if (chatContainer) {
+        chatContainer.style.bottom = "20px"
+        chatContainer.style.height = "80vh"
+        chatContainer.style.maxHeight = "600px"
+
+        if (config.style.position === "left") {
+          chatContainer.style.left = "20px"
+          chatContainer.style.right = "auto"
+        } else {
+          chatContainer.style.right = "20px"
+          chatContainer.style.left = "auto"
         }
       }
     }
@@ -638,32 +668,18 @@
 
   // Configura event listeners
   function setupEventListeners() {
-    // Modifique a função setupEventListeners para chamar ensureMobileVisibility
-    // Encontre a função setupEventListeners e adicione a chamada para ensureMobileVisibility
-    // dentro do evento de clique do botão flutuante:
-
-    // Substitua este trecho:
-    // Botão flutuante (abre/fecha chat)
-    // widgetContainer.querySelector(".chat-toggle").addEventListener("click", () => {
-    //   chatContainer.classList.toggle("open")
-
-    //   // Se estiver abrindo em mobile, ajusta para tela cheia
-    //   if (chatContainer.classList.contains("open") && window.innerWidth <= 480) {
-    //     document.body.style.overflow = "hidden" // Previne scroll da página
-    //   } else {
-    //     document.body.style.overflow = "" // Restaura scroll
-    //   }
-    // })
-
-    // Por este:
     // Botão flutuante (abre/fecha chat)
     widgetContainer.querySelector(".chat-toggle").addEventListener("click", () => {
+      // Antes de abrir, garante que o widget esteja posicionado corretamente
+      if (!chatContainer.classList.contains("open")) {
+        ensureMobileVisibility()
+      }
+
       chatContainer.classList.toggle("open")
 
       // Se estiver abrindo em mobile, ajusta para tela cheia
       if (chatContainer.classList.contains("open") && window.innerWidth <= 480) {
         document.body.style.overflow = "hidden" // Previne scroll da página
-        ensureMobileVisibility() // Garante que o widget seja visível
 
         // Força um pequeno atraso para garantir que o scroll seja aplicado após a abertura
         setTimeout(() => {
@@ -698,7 +714,14 @@
 
     // Detecta mudanças de orientação e tamanho da tela
     window.addEventListener("resize", handleResize)
-    window.addEventListener("orientationchange", handleResize)
+
+    // Adiciona um listener para o evento de scroll para garantir que o widget permaneça visível
+    window.addEventListener("scroll", () => {
+      if (chatContainer.classList.contains("open") && window.innerWidth <= 480) {
+        // Força o scroll para o topo
+        window.scrollTo(0, 0)
+      }
+    })
   }
 
   // Função para lidar com mudanças de tamanho/orientação
